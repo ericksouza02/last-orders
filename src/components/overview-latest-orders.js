@@ -1,3 +1,4 @@
+import React,{useEffect, useState, useMemo} from 'react'
 import {format} from 'date-fns'
 import PropTypes from 'prop-types'
 import getTimeDifference from './retornaHora/retornaHora'
@@ -18,30 +19,48 @@ import {
 import LockIcon from '@mui/icons-material/Lock';
 import LockOpenIcon from '@mui/icons-material/LockOpen';
 import SearchIcon from '@mui/icons-material/Search';
-import Input from '@mui/material/Input';
+import TextField from '@mui/material/TextField';
 import BlockIcon from '@mui/icons-material/Block';
 import { Scrollbar } from './scrollbar';
 import { SeverityPill } from './severity-pill';
-import { useState } from 'react';
+import api from '../datas/dados.JSON'
 
-const handleClick = () => {
-  return(
-    <input type='text'/>
-  )
-}
-
-
-export const OverviewLatestOrders = (props) => {
-  //const [busca, setBusca] = useState('')
-  const { users = [] } = props;
+export const OverviewLatestOrders = () => {
+  const [users, setUsers] = useState([])
+  const [busca, setBusca] = useState('')
   
-  //const usuariosFiltrados = users.filter((user) => user.includes(busca))
+  const usuariosFiltrados = useMemo(() => {
+    const lowerBusca = busca.toLowerCase()
+    return users.filter(user=> user.Name.toLowerCase().includes(lowerBusca))
+  },[busca, users])
+
+  useEffect(()=>{
+    fetch(api)
+    .then(resp => resp.json())
+    .then(data=> setUsers(data))
+  }, [])
+  
+
   
   return (
     <Card style={{border: '4px solid rgb(230, 231, 232, 0.9)'}}>
       <Card style={{display: 'flex',alignItems:'center', justifyContent:'space-between'}}>
-        <CardHeader title="Latest Orders" onClick={handleClick} />
-        
+        <CardHeader title="Latest Orders" style={{margin: 0}}/>
+        <TextField
+          id="standard-textarea"
+          label="Search Name"
+          placeholder="Digite um nome"
+          multiline
+          variant="standard"
+          style={{
+            marginRight:'20px',
+            marginBottom: '15px',
+            backgroundColor:'#fff',
+            color: '#fff'
+          }}
+          value={busca}
+          onChange={e=>setBusca(e.target.value)}
+        />
       </Card>
       <Scrollbar>
         <Box style={{width: '100%', }}>
@@ -64,7 +83,7 @@ export const OverviewLatestOrders = (props) => {
                 </TableRow>
           </TableHead>
             <TableBody>
-              {users.map((user) => {
+              {usuariosFiltrados.map((user) => {
                 return (
                   <TableRow
                     hover
